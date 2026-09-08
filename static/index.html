@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/static/manifest.json">
+    <title>Prex ARS</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+        .card { background: #1e293b; width: 100%; max-width: 380px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid #334155; }
+        h1 { font-size: 1.1rem; text-align: center; margin-bottom: 16px; color: #94a3b8; font-weight: 500; }
+        .rates { display: flex; justify-content: space-around; margin-bottom: 20px; background: #0f172a; padding: 12px; border-radius: 12px; font-size: 0.85rem; border: 1px solid #1e293b; }
+        .rate-box { text-align: center; }
+        .rate-val { font-weight: 700; color: #38bdf8; font-size: 1rem; margin-top: 2px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+        input, select { background: #0f172a; border: 1px solid #334155; color: #fff; padding: 14px; border-radius: 12px; font-size: 1.2rem; outline: none; }
+        input { flex: 1; width: 100%; font-weight: 600; }
+        input:focus, select:focus { border-color: #38bdf8; }
+        select { font-weight: 600; cursor: pointer; padding-right: 8px; }
+        .result-box { background: #0284c7; padding: 20px; border-radius: 14px; text-align: center; }
+        .result-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 600; }
+        .result-val { font-size: 2.2rem; font-weight: 800; margin-top: 4px; word-break: break-all; }
+        .status { text-align: center; font-size: 0.75rem; color: #64748b; margin-top: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Conversor Prex Argentina</h1>
+    
+    <div class="rates">
+        <div class="rate-box">
+            <div>1 UYU</div>
+            <div class="rate-val" id="rate-uyu">--</div>
+        </div>
+        <div class="rate-box">
+            <div>1 USD</div>
+            <div class="rate-val" id="rate-usd">--</div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <input type="number" id="monto" placeholder="0" inputmode="decimal" autofocus>
+        <select id="moneda">
+            <option value="uyu">$ UY</option>
+            <option value="usd">U$S</option>
+        </select>
+    </div>
+
+    <div class="result-box">
+        <div class="result-title">Recibís en Argentina</div>
+        <div class="result-val" id="resultado">$ 0,00</div>
+    </div>
+
+    <div class="status" id="status">Cargando cotización...</div>
+</div>
+
+<script>
+    let cotizaciones = { uyu_to_ars: 0, usd_to_ars: 0 };
+
+    async function cargarCotizaciones() {
+        try {
+            const res = await fetch('/cotizaciones');
+            if (!res.ok) throw new Error();
+            cotizaciones = await res.json();
+            
+            document.getElementById('rate-uyu').textContent = `$ ${cotizaciones.uyu_to_ars}`;
+            document.getElementById('rate-usd').textContent = `$ ${cotizaciones.usd_to_ars}`;
+            
+            const hora = new Date(cotizaciones.last_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('status').textContent = `Actualizado a las ${hora}`;
+            calcular();
+        } catch (e) {
+            document.getElementById('status').textContent = 'Error de conexión';
+        }
+    }
+
+    function calcular() {
+        const monto = parseFloat(document.getElementById('monto').value) || 0;
+        const moneda = document.getElementById('moneda').value;
+        const tasa = moneda === 'uyu' ? cotizaciones.uyu_to_ars : cotizaciones.usd_to_ars;
+        const total = monto * tasa;
+        
+        document.getElementById('resultado').textContent = `$ ${total.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    document.getElementById('monto').addEventListener('input', calcular);
+    document.getElementById('moneda').addEventListener('change', calcular);
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/sw.js');
+    }
+
+    cargarCotizaciones();
+</script>
+</body>
+</html>
