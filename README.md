@@ -24,11 +24,11 @@ Aplicación web simple para convertir montos desde **UYU** y **USD** a **ARS** u
 
 ## Estructura del proyecto
 
-- `/home/runner/work/conversorPREX/conversorPREX/main.py`: backend FastAPI, scraping, cache y endpoints
-- `/home/runner/work/conversorPREX/conversorPREX/static/index.html`: interfaz principal
-- `/home/runner/work/conversorPREX/conversorPREX/static/manifest.json`: configuración PWA
-- `/home/runner/work/conversorPREX/conversorPREX/static/sw.js`: service worker
-- `/home/runner/work/conversorPREX/conversorPREX/requirements.txt`: dependencias Python
+- `main.py`: backend FastAPI, scraping, cache y endpoints
+- `/static/index.html`: interfaz principal
+- `/static/manifest.json`: configuración PWA
+- `/static/sw.js`: service worker
+- `requirements.txt`: dependencias Python
 
 ## Requisitos
 
@@ -38,7 +38,7 @@ Aplicación web simple para convertir montos desde **UYU** y **USD** a **ARS** u
 ## Instalación
 
 ```bash
-cd /home/runner/work/conversorPREX/conversorPREX
+cd conversorPREX/
 python -m venv .venv
 source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 pip install -r requirements.txt
